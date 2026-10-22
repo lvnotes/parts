@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Знаходження числа за його дробом — 4 клас</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marmelad&display=swap">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --sky-top: #cfd8ff;
+  --sky-mid: #6fa8e8;
+  --meadow: #a9d57a;
+  --ink: #3a1d0e;
+  --card: rgba(255, 255, 255, 0.82);
+  --opt-a: #f9d77e;
+  --opt-b: #f4b883;
+  --opt-edge: #e0913f;
+  --ok: #3f9e4d;
+  --ok-bg: #c9efc9;
+  --bad: #c8412f;
+  --bad-bg: #f8cfc7;
+  --bar: rgba(255, 255, 255, 0.9);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sky-top: #1d2350;
+    --sky-mid: #26467a;
+    --meadow: #2f5a34;
+    --ink: #f6e9dc;
+    --card: rgba(24, 28, 48, 0.82);
+    --opt-a: #6e5a24;
+    --opt-b: #6e4a2a;
+    --opt-edge: #c98a3d;
+    --ok: #7fd48a;
+    --ok-bg: #21472a;
+    --bad: #ff9c8c;
+    --bad-bg: #5a2a24;
+    --bar: rgba(24, 28, 48, 0.9);
+  }
+}
+:root[data-theme="dark"] {
+  --sky-top: #1d2350;
+  --sky-mid: #26467a;
+  --meadow: #2f5a34;
+  --ink: #f6e9dc;
+  --card: rgba(24, 28, 48, 0.82);
+  --opt-a: #6e5a24;
+  --opt-b: #6e4a2a;
+  --opt-edge: #c98a3d;
+  --ok: #7fd48a;
+  --ok-bg: #21472a;
+  --bad: #ff9c8c;
+  --bad-bg: #5a2a24;
+  --bar: rgba(24, 28, 48, 0.9);
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Marmelad", "Comic Sans MS", "Trebuchet MS", sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 38%, var(--meadow) 100%) fixed;
+  line-height: 1.35;
+}
+.bar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 10px 18px;
+  background: var(--bar);
+  border-radius: 0 0 18px 18px;
+  font-size: 1.15rem;
+}
+.bar strong { font-size: 1.35rem; }
+.dots { display: flex; gap: 6px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--opt-edge); background: transparent; }
+.dot.ok { background: var(--ok); border-color: var(--ok); }
+.dot.bad { background: var(--bad); border-color: var(--bad); }
+main { max-width: 760px; margin: 0 auto; padding: 18px 14px 40px; }
+h1 { font-size: clamp(1.5rem, 5vw, 2.1rem); text-align: center; margin: 14px 0 4px; font-weight: 400; }
+.sub { text-align: center; margin: 0 0 22px; font-size: 1.05rem; }
+.q {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 22px 18px 18px;
+  margin-bottom: 20px;
+}
+.num { font-size: 0.95rem; margin-bottom: 8px; }
+.text { font-size: clamp(1.35rem, 4.6vw, 1.9rem); text-align: center; margin: 6px 4px 20px; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 1.5rem;
+  color: var(--ink);
+  background: var(--opt-a);
+  border: 2px solid var(--opt-edge);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.opt:nth-child(4n+2), .opt:nth-child(4n+3) { background: var(--opt-b); }
+.opt .l { font-size: 1rem; min-width: 1.2em; }
+.opt .v { flex: 1; text-align: center; }
+.opt:hover:not(:disabled) { transform: translateY(-2px); }
+.opt:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.opt:disabled { cursor: default; }
+.opt.right { background: var(--ok-bg); border-color: var(--ok); }
+.opt.right .v::after { content: " ✓"; color: var(--ok); }
+.opt.wrong { background: var(--bad-bg); border-color: var(--bad); }
+.opt.wrong .v::after { content: " ✗"; color: var(--bad); }
+.opt.dim { opacity: 0.55; }
+.fb { margin: 16px 2px 0; font-size: 1.1rem; min-height: 1.4em; }
+.fb b.ok { color: var(--ok); }
+.fb b.bad { color: var(--bad); }
+.fb .sol { display: block; margin-top: 4px; font-size: 1rem; }
+.result {
+  display: none;
+  background: var(--card);
+  border-radius: 22px;
+  padding: 22px 18px;
+  text-align: center;
+  font-size: 1.3rem;
+}
+.result.show { display: block; }
+.result button {
+  margin-top: 14px;
+  font: inherit;
+  font-size: 1.1rem;
+  padding: 10px 22px;
+  color: var(--ink);
+  background: var(--opt-a);
+  border: 2px solid var(--opt-edge);
+  border-radius: 10px;
+  cursor: pointer;
+}
+@media (max-width: 480px) {
+  .opts { gap: 8px; }
+  .opt { font-size: 1.3rem; padding: 8px 10px; gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .opt:hover:not(:disabled) { transform: none; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <span>Правильно: <strong id="score">0</strong> з 5</span>
+  <span class="dots" id="dots"></span>
+</div>
+<main>
+  <h1>Знаходження числа за його дробом</h1>
+  <p class="sub">4 клас. Обери відповідь у кожному завданні.</p>
+  <div id="quiz"></div>
+  <div class="result" id="result">
+    <div id="resText"></div>
+    <button id="again" type="button">Пройти ще раз</button>
+  </div>
+</main>
+<script>
+var Q = [
+  { t: "Знайти число, 1/4 якого становить 30",
+    o: [7, 34, 30, 120, 4, 26], a: 3,
+    s: "30 · 4 = 120" },
+  { t: "Знайти число, 3/5 якого становить 186",
+    o: [310, 62, 558, 5, 186, 372], a: 0,
+    s: "186 : 3 = 62 (це 1/5), 62 · 5 = 310" },
+  { t: "Туристи пройшли 5/8 маршруту, це становить 15 км. Яка довжина всього маршруту?",
+    o: [40, 24, 15, 3, 9, 8], a: 1,
+    s: "15 : 5 = 3 (км — це 1/8), 3 · 8 = 24 км" },
+  { t: "Оля витратила 3/10 своїх грошей на книжку, це становить 90 грн. Скільки грошей було в Олі?",
+    o: [27, 90, 30, 900, 300, 120], a: 4,
+    s: "90 : 3 = 30 (грн — це 1/10), 30 · 10 = 300 грн" },
+  { t: "Садівник посадив 5/6 усіх саджанців, це 35 саджанців. Скільки всього було саджанців?",
+    o: [30, 6, 35, 7, 210, 42], a: 5,
+    s: "35 : 5 = 7 (це 1/6), 7 · 6 = 42 саджанці" }
+];
+var LET = ["А", "Б", "В", "Г", "Д", "Е"];
+var quiz = document.getElementById("quiz");
+var dotsEl = document.getElementById("dots");
+var scoreEl = document.getElementById("score");
+var resultEl = document.getElementById("result");
+var state;
+
+function build() {
+  state = { done: 0, score: 0 };
+  quiz.innerHTML = "";
+  dotsEl.innerHTML = "";
+  scoreEl.textContent = "0";
+  resultEl.classList.remove("show");
+  Q.forEach(function (q, i) {
+    var d = document.createElement("span");
+    d.className = "dot";
+    d.id = "dot" + i;
+    dotsEl.appendChild(d);
+
+    var card = document.createElement("section");
+    card.className = "q";
+    card.innerHTML = '<div class="num">Завдання ' + (i + 1) + ' з ' + Q.length + '</div>' +
+      '<div class="text"></div><div class="opts"></div><div class="fb" aria-live="polite"></div>';
+    card.querySelector(".text").textContent = q.t;
+    var opts = card.querySelector(".opts");
+    q.o.forEach(function (v, j) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.innerHTML = '<span class="l">' + LET[j] + '</span><span class="v">' + v + '</span>';
+      b.addEventListener("click", function () { answer(i, j, card); });
+      opts.appendChild(b);
+    });
+    quiz.appendChild(card);
+  });
+}
+
+function answer(i, j, card) {
+  var q = Q[i];
+  var btns = card.querySelectorAll(".opt");
+  var good = j === q.a;
+  btns.forEach(function (b, k) {
+    b.disabled = true;
+    if (k === q.a) b.classList.add("right");
+    else if (k === j) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  var fb = card.querySelector(".fb");
+  fb.innerHTML = good
+    ? '<b class="ok">Правильно!</b><span class="sol"></span>'
+    : '<b class="bad">Неправильно.</b> Правильна відповідь: ' + LET[q.a] + ' (' + q.o[q.a] + ')<span class="sol"></span>';
+  fb.querySelector(".sol").textContent = "Розв’язання: " + q.s;
+  document.getElementById("dot" + i).classList.add(good ? "ok" : "bad");
+  state.done++;
+  if (good) { state.score++; scoreEl.textContent = state.score; }
+  if (state.done === Q.length) {
+    var msg = state.score === Q.length ? "Відмінно! Усі відповіді правильні." :
+              state.score >= 3 ? "Добре! Перевір завдання з помилками." :
+              "Спробуй ще раз — у тебе вийде!";
+    document.getElementById("resText").textContent = "Результат: " + state.score + " з " + Q.length + ". " + msg;
+    resultEl.classList.add("show");
+    resultEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+document.getElementById("again").addEventListener("click", function () {
+  build();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+build();
+</script>
+</body>
+</html>
