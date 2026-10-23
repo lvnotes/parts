@@ -170,23 +170,64 @@ h1 { font-size: clamp(1.5rem, 5vw, 2.1rem); text-align: center; margin: 14px 0 4
   </div>
 </main>
 <script>
-var Q = [
-  { t: "Знайти число, 1/4 якого становить 30",
-    o: [7, 34, 30, 120, 4, 26], a: 3,
-    s: "30 · 4 = 120" },
-  { t: "Знайти число, 3/5 якого становить 186",
-    o: [310, 62, 558, 5, 186, 372], a: 0,
-    s: "186 : 3 = 62 (це 1/5), 62 · 5 = 310" },
-  { t: "Туристи пройшли 5/8 маршруту, це становить 15 км. Яка довжина всього маршруту?",
-    o: [40, 24, 15, 3, 9, 8], a: 1,
-    s: "15 : 5 = 3 (км — це 1/8), 3 · 8 = 24 км" },
-  { t: "Оля витратила 3/10 своїх грошей на книжку, це становить 90 грн. Скільки грошей було в Олі?",
-    o: [27, 90, 30, 900, 300, 120], a: 4,
-    s: "90 : 3 = 30 (грн — це 1/10), 30 · 10 = 300 грн" },
-  { t: "Садівник посадив 5/6 усіх саджанців, це 35 саджанців. Скільки всього було саджанців?",
-    o: [30, 6, 35, 7, 210, 42], a: 5,
-    s: "35 : 5 = 7 (це 1/6), 7 · 6 = 42 саджанці" }
-];
+var Q = [];
+function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) { var j = rnd(0, i); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+  return arr;
+}
+function plural(n, one, few, many) {
+  var m = n % 100, k = n % 10;
+  if (m > 10 && m < 15) return many;
+  if (k === 1) return one;
+  if (k > 1 && k < 5) return few;
+  return many;
+}
+// n/d числа дорівнює part = n·u, усе число = d·u
+function pack(n, d, u) {
+  var part = n * u, whole = d * u;
+  var cand = shuffle([part, u, part * d, whole + u, whole - u, part + d, whole + n, whole - n]);
+  var wr = [];
+  cand.forEach(function (v) {
+    if (v > 0 && v !== whole && wr.indexOf(v) < 0 && wr.length < 5) wr.push(v);
+  });
+  var k = 2;
+  while (wr.length < 5) {
+    var v = whole + k * u;
+    if (wr.indexOf(v) < 0) wr.push(v);
+    k++;
+  }
+  var o = shuffle(wr.concat([whole]));
+  return { part: part, whole: whole, o: o, a: o.indexOf(whole) };
+}
+function sol(n, d, u, p, unit) {
+  var s = n === 1
+    ? p.part + " · " + d + " = " + p.whole
+    : p.part + " : " + n + " = " + u + " (це 1/" + d + "), " + u + " · " + d + " = " + p.whole;
+  return s + (unit ? " " + unit : "");
+}
+function makeQuestions() {
+  var list = [], d, n, u, p;
+  // 1. проста задача, чисельник 1
+  d = rnd(3, 9); n = 1; u = rnd(3, 25); p = pack(n, d, u);
+  list.push({ t: "Знайти число, " + n + "/" + d + " якого становить " + p.part, o: p.o, a: p.a, s: sol(n, d, u, p, "") });
+  // 2. проста задача, чисельник більший за 1
+  d = rnd(3, 9); n = rnd(2, Math.min(4, d - 1)); u = rnd(3, 30); p = pack(n, d, u);
+  list.push({ t: "Знайти число, " + n + "/" + d + " якого становить " + p.part, o: p.o, a: p.a, s: sol(n, d, u, p, "") });
+  // 3. маршрут
+  d = rnd(6, 10); n = rnd(2, d - 1); u = rnd(2, 6); p = pack(n, d, u);
+  list.push({ t: "Туристи пройшли " + n + "/" + d + " маршруту, це становить " + p.part + " км. Яка довжина всього маршруту?", o: p.o, a: p.a, s: sol(n, d, u, p, "км") });
+  // 4. гроші
+  d = rnd(0, 1) ? 10 : 5;
+  n = d === 5 ? rnd(2, 4) : rnd(2, 7);
+  u = d === 5 ? rnd(2, 12) * 10 : rnd(1, 5) * 10;
+  p = pack(n, d, u);
+  list.push({ t: "Оля витратила " + n + "/" + d + " своїх грошей на книжку, це становить " + p.part + " грн. Скільки грошей було в Олі?", o: p.o, a: p.a, s: sol(n, d, u, p, "грн") });
+  // 5. саджанці
+  d = rnd(6, 8); n = rnd(d - 3, d - 1); u = rnd(4, 12); p = pack(n, d, u);
+  list.push({ t: "Садівник посадив " + n + "/" + d + " усіх саджанців, це " + p.part + " " + plural(p.part, "саджанець", "саджанці", "саджанців") + ". Скільки всього було саджанців?", o: p.o, a: p.a, s: sol(n, d, u, p, plural(p.whole, "саджанець", "саджанці", "саджанців")) });
+  return list;
+}
 var LET = ["А", "Б", "В", "Г", "Д", "Е"];
 var quiz = document.getElementById("quiz");
 var dotsEl = document.getElementById("dots");
@@ -195,6 +236,7 @@ var resultEl = document.getElementById("result");
 var state;
 
 function build() {
+  Q = makeQuestions();
   state = { done: 0, score: 0 };
   quiz.innerHTML = "";
   dotsEl.innerHTML = "";
